@@ -146,6 +146,7 @@ claude-agent-sdk-master/
 - [Proma](https://github.com/ErlichLiu/proma-oss.git) - 基于 Agent SDK 的完整开源产品（即将发布）
 - [Claude Code](https://claude.ai/code) - Anthropic 官方代码编辑器
 - [MCP Servers](https://github.com/anthropics/mcp-servers) - Model Context Protocol 服务端实现
+- [Craft Agent OSS](https://github.com/lukilabs/craft-agents-oss) - 本项目设计参考，推荐学习
 
 ### 技术栈
 - [Next.js 文档](https://nextjs.org/docs) - App Router 完整指南
