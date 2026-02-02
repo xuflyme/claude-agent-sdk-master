@@ -46,7 +46,7 @@ Agent SDK 的应用空间巨大，但相比单纯套用 LLM API 以及其他需�
 | 章节 | 主题 | 核心内容 | 状态 |
 |------|------|----------|------|
 | **第一章** | 🚀 [快速入门](./01-quick-start) | Workspace、Session、上下文管理、流式对话 | ✅ 已完成 |
-| **第二章** | 🔧 工具调用 | MCP Tools 集成、Tool Calling、实际 Agent 能力 | 🚧 开发中 |
+| **第二章** | 🔧 [工具与 MCP](./02-tools-and-mcp) | MCP Tools 集成、Tool Calling、实际 Agent 能力 | ✅ 已完成 |
 | **第三章** | 🖼️ 多模态支持 | 图片、文件上传处理、多媒体渲染 | 📋 计划中 |
 | **第四章** | 🎨 高级特性 | 自定义 System Prompt、成本追踪、流式优化 | 📋 计划中 |
 
@@ -100,7 +100,7 @@ claude-agent-sdk-master/
 │   ├── README.md            #    详细教程文档
 │   └── CLAUDE.md            #    Claude Code 开发指引
 │
-├── 02-tool-calling/         # 🔧 第二章：工具调用（开发中）
+├── 02-tools-and-mcp/        # 🔧 第二章：工具与 MCP（开发中）
 │   └── ...
 │
 ├── 03-multimodal/           # 🖼️ 第三章：多模态支持（计划中）
