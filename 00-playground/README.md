@@ -6,7 +6,7 @@
 
 ```bash
 # 1. 安装依赖
-cd playground
+cd 00-playground
 pnpm install
 
 # 2. 设置 API Key
@@ -20,7 +20,7 @@ pnpm play
 ## 项目结构
 
 ```
-playground/
+00-playground/
 ├── playground.ts      # 核心入口 - SDK query 调用
 ├── lib/
 │   ├── config.ts      # 配置接口和默认值

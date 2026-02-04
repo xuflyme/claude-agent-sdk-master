@@ -85,13 +85,13 @@ pnpm dev
 
 访问 [http://localhost:3000](http://localhost:3000)，开始你的 Agent SDK 学习之旅！🎉
 
-### 🎮 从 Playground 开始（推荐）
+### 🎮 从 00-Playground 开始（推荐）
 
-如果你想**快速体验** Agent SDK 的核心功能，推荐先从 Playground 开始：
+如果你想**快速体验** Agent SDK 的核心功能，推荐先从 00-Playground 开始：
 
 ```bash
-# 进入 playground 目录
-cd playground
+# 进入 00-playground 目录
+cd 00-playground
 
 # 安装依赖
 pnpm install
@@ -110,7 +110,7 @@ pnpm play
 - 🔧 **交互式配置**：通过命令动态切换工具、输出模式等
 - 🎯 **零 UI 干扰**：纯命令行，专注理解 SDK 机制
 
-适合想要**快速修改代码、理解 SDK 行为**的开发者。详见 [Playground README](./playground/README.md)。
+适合想要**快速修改代码、理解 SDK 行为**的开发者。详见 [Playground README](./00-playground/README.md)。
 
 ---
 
@@ -119,7 +119,7 @@ pnpm play
 ```
 claude-agent-sdk-master/
 │
-├── playground/              # 🎮 SDK 交互式测试环境（推荐入门）
+├── 00-playground/              # 🎮 SDK 交互式测试环境（推荐入门）
 │   ├── playground.ts        #    核心 SDK 调用代码
 │   ├── lib/                 #    配置和 CLI 模块
 │   └── utils/               #    打印输出工具
