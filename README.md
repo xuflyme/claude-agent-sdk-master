@@ -85,12 +85,44 @@ pnpm dev
 
 访问 [http://localhost:3000](http://localhost:3000)，开始你的 Agent SDK 学习之旅！🎉
 
+### 🎮 从 Playground 开始（推荐）
+
+如果你想**快速体验** Agent SDK 的核心功能，推荐先从 Playground 开始：
+
+```bash
+# 进入 playground 目录
+cd playground
+
+# 安装依赖
+pnpm install
+
+# 配置 API Key
+cp .env.example .env.local
+# 编辑 .env.local，填入你的 ANTHROPIC_API_KEY
+
+# 启动交互式测试
+pnpm play
+```
+
+**Playground 的优势：**
+- 📝 **核心代码精简**：`playground.ts` 只有 ~120 行，专注于 SDK 调用
+- ⚡ **即时反馈**：修改代码后立即运行查看效果
+- 🔧 **交互式配置**：通过命令动态切换工具、输出模式等
+- 🎯 **零 UI 干扰**：纯命令行，专注理解 SDK 机制
+
+适合想要**快速修改代码、理解 SDK 行为**的开发者。详见 [Playground README](./playground/README.md)。
+
 ---
 
 ## 📂 项目结构
 
 ```
 claude-agent-sdk-master/
+│
+├── playground/              # 🎮 SDK 交互式测试环境（推荐入门）
+│   ├── playground.ts        #    核心 SDK 调用代码
+│   ├── lib/                 #    配置和 CLI 模块
+│   └── utils/               #    打印输出工具
 │
 ├── 01-quick-start/          # 🚀 第一章：快速入门
 │   ├── app/                 #    Next.js App Router
