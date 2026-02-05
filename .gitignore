@@ -64,3 +64,8 @@ yarn.lock
 
 # Local data storage
 .data/
+
+# Playground raw output files
+00-playground/output/
+
+./00-playground/

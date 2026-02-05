@@ -32,6 +32,16 @@ export function printSeparator(title?: string): void {
 // SDK 消息打印
 // ============================================================================
 
+/**
+ * 打印原始模式下的 SDK 消息
+ * 输出美化的 JSON 到终端，不做任何解析
+ */
+export function printRawSDKMessage(msg: SDKMessage, index: number): void {
+  const prefix = `[${index.toString().padStart(3, '0')}]`;
+  console.log(`\n${prefix} Raw JSON:`);
+  console.log(JSON.stringify(msg, null, 2));
+}
+
 /** 打印 SDK 消息的详细信息 */
 export function printSDKMessage(msg: SDKMessage, index: number, cfg: PlaygroundConfig): void {
   const prefix = `[${index.toString().padStart(3, '0')}]`;

@@ -38,6 +38,15 @@ Agent SDK 的应用空间巨大，但相比单纯套用 LLM API 以及其他需�
 **本教程的使命：让你真正理解 Agent SDK 的设计，并能优雅地应用这些状态。**
 
 ---
+## 项目赞助商 MiniMax
+
+本教程推荐采用 MiniMax API 更丝滑更具性价比的完成 Claude Agent SDK 的学习
+
+![MiniMax](https://img.erlich.fun/personal-blog/uPic/I0pljV.png)
+
+MiniMax api 获取和注册地址： https://platform.minimaxi.com/login
+
+---
 
 ## 📖 学习路线
 

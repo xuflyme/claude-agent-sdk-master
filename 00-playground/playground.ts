@@ -17,10 +17,16 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 config({ path: resolve(process.cwd(), '.env') });
 
-import { query, type SDKMessage } from '@anthropic-ai/claude-agent-sdk';
+import { query, type SDKMessage, type PermissionMode } from '@anthropic-ai/claude-agent-sdk';
 import { type PlaygroundConfig } from './lib/config.js';
 import { interactiveLoop } from './lib/cli.js';
-import { printSeparator, printSDKMessage } from './utils/printer.js';
+import { printSeparator, printSDKMessage, printRawSDKMessage } from './utils/printer.js';
+import { RawOutputWriter } from './utils/raw-output-writer.js';
+import {
+  createCustomCanUseTool,
+  buildHooksConfig,
+  type PermissionLogEntry,
+} from './lib/permissions.js';
 
 // ============================================================================
 // 核心查询执行 - SDK 使用示例
@@ -34,6 +40,14 @@ import { printSeparator, printSDKMessage } from './utils/printer.js';
  */
 async function executeQuery(cfg: PlaygroundConfig): Promise<void> {
   printSeparator('SDK 消息');
+
+  // 初始化原始输出写入器（如果启用）
+  let rawWriter: RawOutputWriter | null = null;
+  if (cfg.rawOutput) {
+    rawWriter = new RawOutputWriter(process.cwd());
+    const filePath = rawWriter.startSession();
+    console.log(`📁 原始输出将写入: ${filePath}`);
+  }
 
   // ========================================
   // 🔧 工具配置 - 可以在这里修改
@@ -55,6 +69,33 @@ async function executeQuery(cfg: PlaygroundConfig): Promise<void> {
   }
 
   // ========================================
+  // 🔐 权限配置
+  // ========================================
+
+  // 权限日志回调
+  const onPermissionLog = (entry: PermissionLogEntry): void => {
+    if (cfg.permission.verbosePermissionLog) {
+      const icon = entry.decision === 'allow' ? '✅' : '❌';
+      console.log(`\n${icon} [权限] ${entry.toolName} - ${entry.decision}`);
+      if (entry.reason) {
+        console.log(`   原因: ${entry.reason}`);
+      }
+    }
+  };
+
+  // 构建 canUseTool 回调（如果启用）
+  const canUseTool = cfg.permission.enableCustomCanUseTool
+    ? createCustomCanUseTool(cfg.permission, onPermissionLog)
+    : undefined;
+
+  // 构建 hooks 配置（如果启用）
+  const hooks = buildHooksConfig(cfg.permission, onPermissionLog);
+
+  // 确定权限模式和安全标志
+  const permissionMode: PermissionMode = cfg.permission.mode;
+  const allowDangerouslySkipPermissions = permissionMode === 'bypassPermissions';
+
+  // ========================================
   // 📝 查询配置 - SDK 核心参数
   // ========================================
   const queryConfig = {
@@ -62,12 +103,23 @@ async function executeQuery(cfg: PlaygroundConfig): Promise<void> {
     options: {
       cwd: cfg.workingDirectory,
       includePartialMessages: true,
-      permissionMode: 'bypassPermissions' as const,
-      allowDangerouslySkipPermissions: true,
+      permissionMode,
+      allowDangerouslySkipPermissions,
       tools: toolsConfig,
       env: envConfig,
+      // 条件添加自定义回调
+      ...(canUseTool && { canUseTool }),
+      ...(hooks && { hooks }),
     },
   };
+
+  // 显示当前权限配置摘要
+  if (cfg.permission.verbosePermissionLog) {
+    console.log(`\n🔐 权限模式: ${permissionMode}`);
+    if (canUseTool) console.log('   自定义 canUseTool: 启用');
+    if (hooks) console.log('   PreToolUse Hook: 启用');
+    console.log('');
+  }
 
   // ========================================
   // 🚀 执行查询并处理流式响应
@@ -78,7 +130,16 @@ async function executeQuery(cfg: PlaygroundConfig): Promise<void> {
   let textBuffer = '';
 
   for await (const msg of messages) {
-    printSDKMessage(msg, messageIndex++, cfg);
+    // 原始模式：打印美化 JSON 并写入文件
+    if (cfg.rawOutput) {
+      printRawSDKMessage(msg, messageIndex);
+      rawWriter?.writeMessage(msg);
+    } else {
+      // 正常模式：使用现有打印逻辑
+      printSDKMessage(msg, messageIndex, cfg);
+    }
+
+    messageIndex++;
 
     // 收集最终文本
     if (msg.type === 'assistant' && msg.message?.content) {
@@ -88,6 +149,12 @@ async function executeQuery(cfg: PlaygroundConfig): Promise<void> {
         }
       }
     }
+  }
+
+  // 结束原始输出会话
+  if (rawWriter) {
+    rawWriter.endSession();
+    console.log(`\n📁 原始输出已保存`);
   }
 
   // 非流式模式下显示完整回复

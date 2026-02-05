@@ -4,6 +4,8 @@
  * 定义配置接口和默认值，管理运行时配置状态。
  */
 
+import { type PermissionConfig, DEFAULT_PERMISSION_CONFIG } from './permissions.js';
+
 // ============================================================================
 // 配置接口
 // ============================================================================
@@ -23,6 +25,10 @@ export interface PlaygroundConfig {
   streamText: boolean;
   /** 是否展开内容块详情 */
   expandContent: boolean;
+  /** 是否启用原始输出模式 (美化 JSON + NDJSON 文件) */
+  rawOutput: boolean;
+  /** 权限配置 */
+  permission: PermissionConfig;
 }
 
 // ============================================================================
@@ -36,6 +42,8 @@ export const DEFAULT_CONFIG: Omit<PlaygroundConfig, 'prompt'> = {
   enableTools: true,
   streamText: true,
   expandContent: false,
+  rawOutput: false,
+  permission: { ...DEFAULT_PERMISSION_CONFIG },
 };
 
 // ============================================================================

@@ -1,17 +1,17 @@
 /**
- * Stateless tool matching for SDK message → AgentEvent conversion.
+ * 无状态工具匹配：SDK 消息 → AgentEvent 转换
  *
- * This module extracts tool_start and tool_result events from SDK message
- * content blocks using DIRECT ID matching instead of FIFO queues.
+ * 本模块从 SDK 消息内容块中提取 tool_start 和 tool_result 事件，
+ * 使用关联 ID 模式（Correlation ID Pattern）直接匹配，而非 FIFO 队列。
  *
- * Key principle: Every output is derived from the current message + an
- * append-only tool index. No mutable queues, stacks, or order-dependent state.
+ * 核心原则：所有输出仅依赖当前消息 + 只追加的工具索引。
+ * 无可变队列、栈或依赖顺序的状态。
  */
 
 import type { AgentEvent } from './agent-event';
 
 // ============================================================================
-// Tool Index — append-only, order-independent lookup
+// 工具索引 — 只追加、顺序无关的查找表
 // ============================================================================
 
 export interface ToolEntry {
@@ -20,17 +20,17 @@ export interface ToolEntry {
 }
 
 /**
- * Append-only index of tool metadata, built from tool_start events.
- * Order-independent: inserting A then B = inserting B then A.
- * Used to look up tool name/input when processing tool_result blocks
- * (which carry tool_use_id but not tool_name).
+ * 只追加的工具元数据索引，从 tool_start 事件构建。
+ * 顺序无关：先插入 A 再插入 B = 先插入 B 再插入 A。
+ * 用于处理 tool_result 块时查找工具名称/输入
+ * （tool_result 只携带 tool_use_id，不携带 tool_name）。
  */
 export class ToolIndex {
   private entries = new Map<string, ToolEntry>();
 
-  /** Register a tool (idempotent — same ID always maps to same entry) */
+  /** 注册工具（幂等操作 — 相同 ID 始终映射到相同条目） */
   register(toolUseId: string, name: string, input: Record<string, unknown>): void {
-    // Update input if we now have more complete data (stream events start with empty input)
+    // 如果现在有更完整的数据则更新 input（流式事件开始时 input 为空）
     const existing = this.entries.get(toolUseId);
     if (existing && Object.keys(existing.input).length === 0 && Object.keys(input).length > 0) {
       this.entries.set(toolUseId, { name, input });
@@ -61,10 +61,10 @@ export class ToolIndex {
 }
 
 // ============================================================================
-// Content block types (subset of Anthropic SDK types we need)
+// 内容块类型（我们需要的 Anthropic SDK 类型子集）
 // ============================================================================
 
-/** Represents a tool_use content block from an assistant message */
+/** 表示 assistant 消息中的 tool_use 内容块 */
 export interface ToolUseBlock {
   type: 'tool_use';
   id: string;
@@ -72,7 +72,7 @@ export interface ToolUseBlock {
   input: Record<string, unknown>;
 }
 
-/** Represents a tool_result content block from a user message */
+/** 表示 user 消息中的 tool_result 内容块 */
 export interface ToolResultBlock {
   type: 'tool_result';
   tool_use_id: string;
@@ -80,29 +80,29 @@ export interface ToolResultBlock {
   is_error?: boolean;
 }
 
-/** Represents a text content block */
+/** 表示文本内容块 */
 export interface TextBlock {
   type: 'text';
   text: string;
 }
 
-/** Union of content blocks we handle */
+/** 我们处理的内容块联合类型 */
 export type ContentBlock = ToolUseBlock | ToolResultBlock | TextBlock | { type: string };
 
 // ============================================================================
-// Pure extraction functions
+// 纯提取函数
 // ============================================================================
 
 /**
- * Extract tool_start events from assistant message content blocks.
+ * 从 assistant 消息内容块中提取 tool_start 事件。
  *
- * Each tool_use block in the content becomes a tool_start event.
+ * 内容中的每个 tool_use 块都会转换为一个 tool_start 事件。
  *
- * @param contentBlocks - Content blocks from SDKAssistantMessage.message.content
- * @param toolIndex - Append-only index to register new tools in
- * @param emittedToolStartIds - Set of tool IDs already emitted (for stream/assistant dedup)
- * @param turnId - Current turn correlation ID
- * @returns Array of tool_start AgentEvents
+ * @param contentBlocks - 来自 SDKAssistantMessage.message.content 的内容块
+ * @param toolIndex - 用于注册新工具的只追加索引
+ * @param emittedToolStartIds - 已发出的工具 ID 集合（用于流式/assistant 去重）
+ * @param turnId - 当前轮次关联 ID
+ * @returns tool_start AgentEvent 数组
  */
 export function extractToolStarts(
   contentBlocks: ContentBlock[],
@@ -116,16 +116,16 @@ export function extractToolStarts(
     if (block.type !== 'tool_use') continue;
     const toolBlock = block as ToolUseBlock;
 
-    // Register in index (idempotent — handles both stream and assistant events)
+    // 注册到索引（幂等操作 — 同时处理流式和 assistant 事件）
     toolIndex.register(toolBlock.id, toolBlock.name, toolBlock.input);
 
-    // Dedup: stream_event arrives before assistant message, both have the same tool_use block.
-    // The Set is append-only and order-independent (same ID always deduplicates the same way).
+    // 去重：stream_event 在 assistant message 之前到达，两者包含相同的 tool_use 块。
+    // Set 是只追加且顺序无关的（相同 ID 始终以相同方式去重）。
     if (emittedToolStartIds.has(toolBlock.id)) {
-      // Already emitted via stream — but check if we now have complete input
+      // 已通过流式发出 — 但检查是否现在有完整的 input
       const hasNewInput = Object.keys(toolBlock.input).length > 0;
       if (hasNewInput) {
-        // Re-emit with complete input (assistant message has full input, stream has {})
+        // 使用完整 input 重新发出（assistant message 有完整 input，流式只有 {}）
         const intent = extractIntent(toolBlock);
         const displayName = toolBlock.input._displayName as string | undefined;
         events.push({
@@ -161,19 +161,18 @@ export function extractToolStarts(
 }
 
 /**
- * Extract tool_result events from user message content blocks.
+ * 从 user 消息内容块中提取 tool_result 事件。
  *
- * Each tool_result content block carries an explicit `tool_use_id` that
- * directly identifies which tool the result belongs to. No FIFO matching needed.
+ * 每个 tool_result 内容块都携带明确的 `tool_use_id`，
+ * 直接标识该结果属于哪个工具。无需 FIFO 匹配。
  *
- * Falls back to the convenience field `tool_use_result` when content blocks
- * don't contain tool_result entries.
+ * 当内容块不包含 tool_result 条目时，回退到便捷字段 `tool_use_result`。
  *
- * @param contentBlocks - Content blocks from SDKUserMessage.message.content (may be empty)
- * @param toolUseResultValue - Convenience field tool_use_result from SDK message
- * @param toolIndex - Read-only lookup for tool name/input
- * @param turnId - Current turn correlation ID
- * @returns Array of tool_result AgentEvents
+ * @param contentBlocks - 来自 SDKUserMessage.message.content 的内容块（可能为空）
+ * @param toolUseResultValue - SDK 消息的便捷字段 tool_use_result
+ * @param toolIndex - 用于查找工具名称/输入的只读索引
+ * @param turnId - 当前轮次关联 ID
+ * @returns tool_result AgentEvent 数组
  */
 export function extractToolResults(
   contentBlocks: ContentBlock[],
@@ -183,13 +182,13 @@ export function extractToolResults(
 ): AgentEvent[] {
   const events: AgentEvent[] = [];
 
-  // Primary path: extract tool_use_id directly from content blocks
+  // 主路径：直接从内容块中提取 tool_use_id
   const toolResultBlocks = contentBlocks.filter(
     (b): b is ToolResultBlock => b.type === 'tool_result'
   );
 
   if (toolResultBlocks.length > 0) {
-    // Direct ID matching — each block explicitly identifies its tool
+    // 关联 ID 直接匹配 — 每个块明确标识其对应的工具
     for (const block of toolResultBlocks) {
       const toolUseId = block.tool_use_id;
       const entry = toolIndex.getEntry(toolUseId);
@@ -208,8 +207,8 @@ export function extractToolResults(
       });
     }
   } else if (toolUseResultValue !== undefined) {
-    // Fallback: use convenience field when content blocks are unavailable.
-    // Generate a synthetic ID so the result isn't silently dropped.
+    // 回退路径：当内容块不可用时使用便捷字段。
+    // 生成合成 ID 以避免结果被静默丢弃。
     const toolUseId = `fallback-${turnId ?? 'unknown'}`;
     const entry = toolIndex.getEntry(toolUseId);
 
@@ -231,15 +230,15 @@ export function extractToolResults(
 }
 
 // ============================================================================
-// Helpers (pure)
+// 辅助函数（纯函数）
 // ============================================================================
 
-/** Extract intent from a tool_use block's input */
+/** 从 tool_use 块的 input 中提取意图描述 */
 function extractIntent(toolBlock: ToolUseBlock): string | undefined {
   const input = toolBlock.input;
   if (!input || typeof input !== 'object') return undefined;
 
-  // Check common intent field names
+  // 检查常见的意图字段名
   if ('description' in input && typeof input.description === 'string') {
     return input.description;
   }
@@ -254,8 +253,8 @@ function extractIntent(toolBlock: ToolUseBlock): string | undefined {
 }
 
 /**
- * Convert a tool result to a string.
- * Handles strings, objects, arrays, and primitives.
+ * 将工具结果转换为字符串。
+ * 处理字符串、对象、数组和原始类型。
  */
 export function serializeResult(result: unknown): string {
   if (result === null || result === undefined) {
@@ -267,7 +266,7 @@ export function serializeResult(result: unknown): string {
   }
 
   if (Array.isArray(result)) {
-    // Handle array of content blocks (common in Anthropic SDK)
+    // 处理内容块数组（Anthropic SDK 中常见）
     const textParts: string[] = [];
     for (const item of result) {
       if (typeof item === 'string') {
@@ -281,29 +280,29 @@ export function serializeResult(result: unknown): string {
     if (textParts.length > 0) {
       return textParts.join('\n');
     }
-    // Fallback to JSON for non-text arrays
+    // 非文本数组回退到 JSON
     return JSON.stringify(result, null, 2);
   }
 
   if (typeof result === 'object') {
-    // Check for text content block
+    // 检查文本内容块
     if ('text' in result) {
       return String(result.text);
     }
     if ('type' in result && result.type === 'text' && 'text' in result) {
       return String(result.text);
     }
-    // Fallback to JSON
+    // 回退到 JSON
     return JSON.stringify(result, null, 2);
   }
 
-  // Primitives
+  // 原始类型
   return String(result);
 }
 
 /**
- * Check if a tool result indicates an error.
- * Looks for "Error:" prefix in string results.
+ * 检查工具结果是否表示错误。
+ * 查找字符串结果中的 "Error:" 前缀。
  */
 export function isToolResultError(result: unknown): boolean {
   const resultStr = serializeResult(result);
