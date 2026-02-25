@@ -80,6 +80,18 @@ pnpm lint     # Run ESLint
 - Tailwind CSS 4
 - ESLint with Next.js config
 
+### 02-tools-and-mcp
+- Next.js 16.1.6 (App Router) + Monorepo (pnpm workspace)
+- PromaAgent 事件驱动架构
+- 工具活动可视化系统
+- Shadcn UI + framer-motion
+- 详见 `02-tools-and-mcp/CLAUDE.md`
+
+### 03-agent-with-permission
+- 基于 02-tools-and-mcp 架构，新增 Agent 权限控制功能
+- Next.js 16.1.6 (App Router) + Monorepo (pnpm workspace)
+- 详见 `03-agent-with-permission/CLAUDE.md`
+
 ### Key Files
 - `app/layout.tsx`: Root layout with Geist font configuration
 - `app/page.tsx`: Homepage

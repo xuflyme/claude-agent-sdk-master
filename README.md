@@ -38,6 +38,15 @@ Agent SDK 的应用空间巨大，但相比单纯套用 LLM API 以及其他需�
 **本教程的使命：让你真正理解 Agent SDK 的设计，并能优雅地应用这些状态。**
 
 ---
+## 项目赞助商 MiniMax
+
+本教程推荐采用 MiniMax API 更丝滑更具性价比的完成 Claude Agent SDK 的学习，全面兼容所有功能(订阅 Coding Plan 一样可以生成 Coding Plan api key 来学习和应用到本教程)
+
+![MiniMax](https://img.erlich.fun/personal-blog/uPic/I0pljV.png)
+
+MiniMax api 获取和注册地址，还可领取 88 折的优惠！：https://platform.minimaxi.com/subscribe/coding-plan?code=cVcgRF3hAQ&source=link
+
+---
 
 ## 📖 学习路线
 
@@ -46,7 +55,7 @@ Agent SDK 的应用空间巨大，但相比单纯套用 LLM API 以及其他需�
 | 章节 | 主题 | 核心内容 | 状态 |
 |------|------|----------|------|
 | **第一章** | 🚀 [快速入门](./01-quick-start) | Workspace、Session、上下文管理、流式对话 | ✅ 已完成 |
-| **第二章** | 🔧 工具调用 | MCP Tools 集成、Tool Calling、实际 Agent 能力 | 🚧 开发中 |
+| **第二章** | 🔧 [工具与 MCP](./02-tools-and-mcp) | MCP Tools 集成、Tool Calling、实际 Agent 能力 | ✅ 已完成 |
 | **第三章** | 🖼️ 多模态支持 | 图片、文件上传处理、多媒体渲染 | 📋 计划中 |
 | **第四章** | 🎨 高级特性 | 自定义 System Prompt、成本追踪、流式优化 | 📋 计划中 |
 
@@ -60,7 +69,7 @@ Agent SDK 的应用空间巨大，但相比单纯套用 LLM API 以及其他需�
 
 - **Node.js** 18+
 - **pnpm** 包管理器（推荐）
-- **Anthropic API Key**（可以是支持 Anthropic /v1/messages 的 API）
+- **Anthropic API Key（推荐MiniMax API 即可）** [点击获取 minimax api key](https://platform.minimaxi.com/login)（也可以是支持 Anthropic /v1/messages 的其他 api）
 
 ### 三步开始学习
 
@@ -85,12 +94,44 @@ pnpm dev
 
 访问 [http://localhost:3000](http://localhost:3000)，开始你的 Agent SDK 学习之旅！🎉
 
+### 🎮 从 00-Playground 开始（推荐）
+
+如果你想**快速体验** Agent SDK 的核心功能，推荐先从 00-Playground 开始：
+
+```bash
+# 进入 00-playground 目录
+cd 00-playground
+
+# 安装依赖
+pnpm install
+
+# 配置 API Key
+cp .env.example .env.local
+# 编辑 .env.local，填入你的 ANTHROPIC_API_KEY
+
+# 启动交互式测试
+pnpm play
+```
+
+**Playground 的优势：**
+- 📝 **核心代码精简**：`playground.ts` 只有 ~120 行，专注于 SDK 调用
+- ⚡ **即时反馈**：修改代码后立即运行查看效果
+- 🔧 **交互式配置**：通过命令动态切换工具、输出模式等
+- 🎯 **零 UI 干扰**：纯命令行，专注理解 SDK 机制
+
+适合想要**快速修改代码、理解 SDK 行为**的开发者。详见 [Playground README](./00-playground/README.md)。
+
 ---
 
 ## 📂 项目结构
 
 ```
 claude-agent-sdk-master/
+│
+├── 00-playground/              # 🎮 SDK 交互式测试环境（推荐入门）
+│   ├── playground.ts        #    核心 SDK 调用代码
+│   ├── lib/                 #    配置和 CLI 模块
+│   └── utils/               #    打印输出工具
 │
 ├── 01-quick-start/          # 🚀 第一章：快速入门
 │   ├── app/                 #    Next.js App Router
@@ -100,7 +141,7 @@ claude-agent-sdk-master/
 │   ├── README.md            #    详细教程文档
 │   └── CLAUDE.md            #    Claude Code 开发指引
 │
-├── 02-tool-calling/         # 🔧 第二章：工具调用（开发中）
+├── 02-tools-and-mcp/        # 🔧 第二章：工具与 MCP（开发中）
 │   └── ...
 │
 ├── 03-multimodal/           # 🖼️ 第三章：多模态支持（计划中）
@@ -141,11 +182,13 @@ claude-agent-sdk-master/
 ### 官方文档
 - [Claude Agent SDK 官方文档](https://platform.claude.com/docs/en/agent-sdk/typescript) - TypeScript SDK 官方指南
 - [Anthropic API 文档](https://docs.anthropic.com/) - Claude API 完整文档
+- [MiniMax API 文档](https://platform.minimaxi.com/docs/guides/text-generation) - MiniMax API 完整文档
 
 ### 相关项目
 - [Proma](https://github.com/ErlichLiu/proma-oss.git) - 基于 Agent SDK 的完整开源产品（即将发布）
 - [Claude Code](https://claude.ai/code) - Anthropic 官方代码编辑器
 - [MCP Servers](https://github.com/anthropics/mcp-servers) - Model Context Protocol 服务端实现
+- [Craft Agent OSS](https://github.com/lukilabs/craft-agents-oss) - 本项目设计参考，推荐学习
 
 ### 技术栈
 - [Next.js 文档](https://nextjs.org/docs) - App Router 完整指南
