@@ -64,3 +64,4 @@ yarn.lock
 
 # Local data storage
 .data/
+.claude
